@@ -12,7 +12,7 @@
 ;; Suit is a list of (color mode)
 ;; Where color is one of 'black 'red' blue
 ;; And mode is one of 'solid 'outline
-(define suits '((black solid) (black outline) (red solid) (red outline) (blue solid) (blue outline)))
+(define SUITS '((black solid) (black outline) (red solid) (red outline) (blue solid) (blue outline)))
 
 ;; Suit Image -> Image
 (define (with-suit suit card)
@@ -62,4 +62,21 @@
                              (with-bottom-arrow BC
                                                 (with-right-arrow BC
                                                                   (with-left-arrow BC BLANK))))))
-                                                                                   
+
+(define (no-arrow suit card) card)
+
+(define (add-arrows suit rank card)
+  (cond [(>= rank 8) (with-bottom-arrow suit (add-arrows suit (- rank 8) card))]
+        [(>= rank 4) (with-right-arrow suit (add-arrows suit (- rank 4) card))]
+        [(>= rank 2) (with-top-arrow suit (add-arrows suit (- rank 2) card))]
+        [(>= rank 1) (with-left-arrow suit (add-arrows suit (- rank 1) card))]
+        [else card]))
+
+(define (build-deck low-rank high-rank suits)
+  (flatten
+   (for/list [(suit (in-list suits))]
+     (for/list [(rank (in-range low-rank (add1 high-rank)))]
+       (design->card 
+        (with-suit suit (add-arrows suit rank BLANK)))))))
+
+(define DECK (build-deck 0 15 '((black solid) (black outline) (red solid) (red outline) (blue solid) (blue outline))))
