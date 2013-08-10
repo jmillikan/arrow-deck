@@ -155,11 +155,12 @@
    (rotate 270 (suit-tri '(blue solid)))))
 
 (define DECK-BACK 
-  (overlay/align "left" "middle"
-                 (beside 
-                  (h-space (/ CARD-WIDTH 5.5))
+  (design->card
+   (overlay/align "left" "middle"
+                  (beside 
+                   (h-space (/ CARD-WIDTH 5.5))
                   (scale MEDIUM
-                        (above 
+                         (above 
                          (rotate 0 (suit-symbol '(blue solid)))
                          (v-space (/ CARD-WIDTH 2))
                          (rotate 180 (suit-symbol '(blue outline))))))
@@ -189,7 +190,7 @@
                                                                               (rotate 180 (scale MEDIUM ARROWS))
                                                                               (v-space (/ CARD-WIDTH 3.5)))
                                                        
-                                                                             (with-outline BLANK)))))))
+                                                                             (with-outline BLANK))))))))
   
 (define (write-deck-files prefix deck)
   (for [(i (in-range 0 (length deck)))]
@@ -198,15 +199,23 @@
 (define DECK (cons DECK-BACK (flatten DECK-SUITS)))
 ;(scale 0.2 (list-ref DECK 75))
 
-; To see deck:
-
+(define (with-preview-space card)
+  (above/align 'center
+   (h-space (* CARD-WIDTH 1.1))
+   card
+   (v-space (* CARD-WIDTH 0.1))))
+   
+; Preview image of deck and card back
 (define DECK-PREVIEW
-  (above
-   (scale 0.12 (apply above (map (lambda (suit) 
-                                   (if (> (length suit) 1)
-                                       (apply beside suit)
-                                       (first suit))) DECK-SUITS)))
+  (overlay/align 'center 'center
+                 (above
+                  (scale 0.1 (apply above (map (lambda (suit) 
+                                                 (if (> (length suit) 1)
+                                                     (apply beside (map with-preview-space suit))
+                                                     (first (map with-preview-space suit)))) DECK-SUITS)))
+                  (scale 0.3 DECK-BACK))
+                 (rectangle 1400 1200 'solid 'gray)))
 
-   (scale 0.4 DECK-BACK)))
+
 
 
