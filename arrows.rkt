@@ -16,7 +16,13 @@
 ;; Suit is a list of (color mode)
 ;; Where color is one of 'black 'red' blue
 ;; And mode is one of 'solid 'outline
-(define SUITS '((black solid) (black outline) (red solid) (red outline) (blue solid) (blue outline)))
+(define SUITS '((black solid) (red solid) (red outline) (black outline) (blue solid) (blue outline)))
+
+(define (h-space w)
+  (rectangle w 1 'solid TRANS))
+
+(define (v-space h)
+  (rectangle 1 h 'solid TRANS))
 
 ;; Divided bar to indicate suit. 1 section for black, 2 for red, 3 for blue.
 (define (suit-bar color)
@@ -136,13 +142,27 @@
 (define (with-outline design)
   (overlay/align 'center 'center design (rectangle (* CARD-WIDTH 0.65) (* CARD-HEIGHT 0.7) 'outline (make-pen 'gray (round (/ CARD-WIDTH 80)) 'solid 'round 'round))))
 
-(define DECK-SUITS (build-deck 0 15 '((black solid) (red solid) (blue solid) (black outline) (red outline) (blue outline))))
+(define DECK-SUITS (build-deck 0 15 SUITS))
 
-(define (h-space w)
-  (rectangle w 1 'solid TRANS))
+(define (diagonal-juxtapose i1 i2)
+  (overlay/align 'center 'center
+                    (beside 
+                     (above i1 (v-space (* (image-height i2) 0.8)))
+                     (h-space (/ CARD-WIDTH 10))
+                     (above (v-space (* (image-height i1) 0.8)) i2))
+                    BLANK))
 
-(define (v-space h)
-  (rectangle 1 h 'solid TRANS))
+(define (bottom-ace ace-suit second-suit)
+    (with-outline  
+     (diagonal-juxtapose (scale 0.4 (suit-symbol second-suit)) (suit-symbol ace-suit))))
+
+(define (top-ace ace-suit second-suit)
+    (with-outline  
+     (diagonal-juxtapose (suit-symbol ace-suit) (scale 0.4 (suit-symbol second-suit)))))
+
+(define DECK-ACES (map design->card (append (map top-ace SUITS (append (cdr SUITS) (cons (car SUITS) '())))
+                                              (map bottom-ace (append (cdr SUITS) (cons (car SUITS) '())) SUITS))))
+
 
 (define MEDIUM 0.3)
 
@@ -213,9 +233,10 @@
                                                  (if (> (length suit) 1)
                                                      (apply beside (map with-preview-space suit))
                                                      (first (map with-preview-space suit)))) DECK-SUITS)))
-                  (scale 0.3 DECK-BACK))
+                  (scale 0.13 (apply beside (map with-preview-space DECK-ACES)))
+                  (scale 0.2 DECK-BACK))
                  (rectangle 1400 1200 'solid 'gray)))
 
-
+DECK-PREVIEW
 
 
