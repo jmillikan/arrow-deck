@@ -3,15 +3,17 @@
 (require 2htdp/image)
 (require rackunit)
 
-;; Artscow rectangular deck: 750 x 1050
-
 (define TRANS (make-color 255 255 255 0))
 
-(define CARD-WIDTH 750)
-(define CARD-HEIGHT 1050)
+; Design/bleed widths recommended by some BGG user...
+(define CARD-WIDTH 897)
+(define CARD-HEIGHT 1243)
+
+(define DESIGN-WIDTH 780)
+(define DESIGN-HEIGHT 1081)
 
 ;; TODO: Identify the real pixel bleed area...
-(define BLANK (rectangle (- CARD-WIDTH 59) (- CARD-HEIGHT 50) 'solid TRANS))
+(define BLANK (rectangle DESIGN-WIDTH DESIGN-HEIGHT 'solid TRANS))
 
 ;; Suit is a list of (color mode)
 ;; Where color is one of 'black 'red' blue
@@ -26,9 +28,9 @@
 
 ;; Divided bar to indicate suit. 1 section for black, 2 for red, 3 for blue.
 (define (suit-bar color)
-  (let* ((bar-width (/ CARD-WIDTH 4))
-         (break-width (/ CARD-WIDTH 30))
-         (bar-height (/ CARD-HEIGHT 10)))
+  (let* ((bar-width (/ DESIGN-WIDTH 4))
+         (break-width (/ DESIGN-WIDTH 30))
+         (bar-height (/ DESIGN-HEIGHT 10)))
     
     (cond [(equal? color 'blue)
            (let ((section-width (/ (- bar-width (* 2 break-width)) 3)))
@@ -58,18 +60,18 @@
 (define (suit-symbol suit)
   (above/align "center"
                (if (equal? (second suit) 'solid)
-                   (circle (/ CARD-WIDTH 8) 'solid (first suit))
-                   (circle (/ CARD-WIDTH 8) 'outline (make-pen (first suit) (round (/ CARD-WIDTH 20)) 'solid 'round 'round)))
-               (rectangle (/ CARD-WIDTH 4) (/ CARD-HEIGHT 25) 'solid TRANS) ; spacer
+                   (circle (/ DESIGN-WIDTH 8) 'solid (first suit))
+                   (circle (/ DESIGN-WIDTH 8) 'outline (make-pen (first suit) (round (/ DESIGN-WIDTH 20)) 'solid 'round 'round)))
+               (rectangle (/ DESIGN-WIDTH 4) (/ DESIGN-HEIGHT 25) 'solid TRANS) ; spacer
                (suit-bar (first suit))
-               (rectangle (/ CARD-WIDTH 4) (/ CARD-HEIGHT 30) 'solid TRANS))) ; More space for weight...
+               (rectangle (/ DESIGN-WIDTH 4) (/ DESIGN-HEIGHT 30) 'solid TRANS))) ; More space for weight...
                                   
 (define (suit-tri suit)
   (above
-   (rectangle (/ CARD-WIDTH 6) (/ CARD-WIDTH 30) 'solid TRANS)
+   (rectangle (/ DESIGN-WIDTH 6) (/ DESIGN-WIDTH 30) 'solid TRANS)
    (overlay/align 'center 'center
-                  (triangle (/ CARD-WIDTH 6) 'solid (first suit))
-                  (triangle (/ CARD-WIDTH 6) 'outline (make-pen (first suit) (round (/ CARD-WIDTH 50)) 'solid 'round 'round)))))
+                  (triangle (/ DESIGN-WIDTH 6) 'solid (first suit))
+                  (triangle (/ DESIGN-WIDTH 6) 'outline (make-pen (first suit) (round (/ DESIGN-WIDTH 50)) 'solid 'round 'round)))))
 
 
 (define (with-top-arrow suit card)
@@ -79,10 +81,10 @@
   (overlay/align 'center 'bottom (rotate 180 (scale/xy 1 1.25 (suit-tri suit))) card))
 
 (define (with-left-arrow suit card)
-  (overlay/align 'left 'center (rotate 90 (scale/xy 1.1 1 (suit-tri suit))) card))
+  (overlay/align 'left 'center (rotate 90 (scale/xy 1.1 1.07 (suit-tri suit))) card))
 
 (define (with-right-arrow suit card)
-  (overlay/align 'right 'center (rotate 270 (scale/xy 1.1 1 (suit-tri suit))) card))
+  (overlay/align 'right 'center (rotate 270 (scale/xy 1.1 1.07 (suit-tri suit))) card))
 
 (define eight-black-dot
   (with-suit '(black solid) 
@@ -115,16 +117,18 @@
 ; TODO: Mini-suit in summary
 (define (with-corners rank suit card)
   (let ((summary
-         (above/align 'center
+         (beside
+          (h-space (/ DESIGN-WIDTH 30))
+          (above/align 'center
                       (text/font (number->string rank) 
-                           (round (/ CARD-WIDTH 6))
+                           (round (/ DESIGN-WIDTH 6))
                            (first suit)
                            "Stint Ultra Condensed"
                            'system
                            'normal
                            'bold
                            #f)
-                      (scale 0.3 (suit-symbol suit)))))
+                      (scale 0.3 (suit-symbol suit))))))
     (overlay/align 'left 'top
                    summary
                    (overlay/align 'right 'bottom
@@ -135,12 +139,12 @@
    (for/list [(suit (in-list suits))]
      (for/list [(rank (in-range low-rank (add1 high-rank)))]
        (design->card 
-        (with-outline 
+        (with-outline
          (with-corners rank suit
                        (with-suit suit (add-arrows suit rank BLANK))))))))
 
 (define (with-outline design)
-  (overlay/align 'center 'center design (rectangle (* CARD-WIDTH 0.65) (* CARD-HEIGHT 0.7) 'outline (make-pen 'gray (round (/ CARD-WIDTH 80)) 'solid 'round 'round))))
+  (overlay/align 'center 'center design (rectangle (* DESIGN-WIDTH 0.7) (* DESIGN-HEIGHT 0.75) 'outline (make-pen 'gray (round (/ DESIGN-WIDTH 80)) 'solid 'round 'round))))
 
 (define DECK-SUITS (build-deck 0 15 SUITS))
 
@@ -148,7 +152,7 @@
   (overlay/align 'center 'center
                     (beside 
                      (above i1 (v-space (* (image-height i2) 0.8)))
-                     (h-space (/ CARD-WIDTH 10))
+                     (h-space (/ DESIGN-WIDTH 10))
                      (above (v-space (* (image-height i1) 0.8)) i2))
                     BLANK))
 
@@ -169,20 +173,20 @@
 (define ARROWS
   (beside/align 'center
    (rotate 90 (suit-tri '(red solid)))
-   (h-space (/ CARD-WIDTH 20))
-   (above  (scale/xy 1 1.2 (suit-tri '(black solid))) (v-space (/ CARD-HEIGHT 10)))
-   (h-space (/ CARD-WIDTH 20))
+   (h-space (/ DESIGN-WIDTH 20))
+   (above  (scale/xy 1 1.2 (suit-tri '(black solid))) (v-space (/ DESIGN-HEIGHT 10)))
+   (h-space (/ DESIGN-WIDTH 20))
    (rotate 270 (suit-tri '(blue solid)))))
 
 (define DECK-BACK 
   (design->card
    (overlay/align "left" "middle"
                   (beside 
-                   (h-space (/ CARD-WIDTH 5.5))
+                   (h-space (/ DESIGN-WIDTH 5))
                   (scale MEDIUM
                          (above 
                          (rotate 0 (suit-symbol '(blue solid)))
-                         (v-space (/ CARD-WIDTH 2))
+                         (v-space (/ DESIGN-WIDTH 2))
                          (rotate 180 (suit-symbol '(blue outline))))))
                  
                  (overlay/align "right" "middle"
@@ -190,25 +194,25 @@
                                  (scale MEDIUM
                                         (above 
                                          (rotate 0 (suit-symbol '(red solid)))
-                                         (v-space (/ CARD-WIDTH 2))
+                                         (v-space (/ DESIGN-WIDTH 2))
                                          (rotate 180 (suit-symbol '(red outline)))))
-                                 (rectangle (/ CARD-WIDTH 5.5) 1 'solid TRANS))
+                                 (h-space (/ DESIGN-WIDTH 5)))
                                 
                                 (overlay/align "center" "top"
                                                (above
-                                                (v-space (/ CARD-WIDTH 3.5))
+                                                (v-space (/ DESIGN-WIDTH 3.5))
                                                 (scale MEDIUM (suit-symbol '(black solid))))
                                                
                                                (overlay/align "center" "bottom"
                                                               (above
                                                                (rotate 180 (scale MEDIUM (suit-symbol '(black outline))))
-                                                               (v-space (/ CARD-WIDTH 1.67)))
+                                                               (v-space (/ DESIGN-WIDTH 1.67)))
                                                               
                                                
                                                               (overlay/align "center" "bottom"
                                                                              (above
                                                                               (rotate 180 (scale MEDIUM ARROWS))
-                                                                              (v-space (/ CARD-WIDTH 3.5)))
+                                                                              (v-space (/ DESIGN-WIDTH 3.5)))
                                                        
                                                                              (with-outline BLANK))))))))
   
@@ -216,7 +220,7 @@
   (for [(i (in-range 0 (length deck)))]
     (save-image (list-ref deck i) (string-append prefix (number->string (add1 i)) ".png"))))
 
-(define DECK (cons DECK-BACK (flatten DECK-SUITS)))
+(define DECK (append (flatten DECK-SUITS) DECK-ACES (list DECK-BACK)))
 ;(scale 0.2 (list-ref DECK 75))
 
 (define (with-preview-space card)
@@ -235,7 +239,7 @@
                                                      (first (map with-preview-space suit)))) DECK-SUITS)))
                   (scale 0.13 (apply beside (map with-preview-space DECK-ACES)))
                   (scale 0.2 DECK-BACK))
-                 (rectangle 1400 1200 'solid 'gray)))
+                 (rectangle 1600 1300 'solid 'gray)))
 
 DECK-PREVIEW
 
