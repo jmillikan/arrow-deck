@@ -5,12 +5,35 @@
 
 (define TRANS (make-color 255 255 255 0))
 
-; Design/bleed widths recommended by some BGG user...
-(define CARD-WIDTH 897)
-(define CARD-HEIGHT 1243)
+#|
+These design widths extend significantly into the interior of the card to where the rank icons start.
+It would hypothetically be better to plant these right where the bleed edge is supposed to be, but meh.
+|#
 
-(define DESIGN-WIDTH 780)
-(define DESIGN-HEIGHT 1081)
+(define ARTSCOW-CARD-WIDTH 897) ; About 5:7
+(define ARTSCOW-CARD-HEIGHT 1243)
+
+(define ARTSCOW-DESIGN-WIDTH 780)
+(define ARTSCOW-DESIGN-HEIGHT 1081)
+
+(define TGC-CARD-WIDTH 825)
+(define TGC-CARD-HEIGHT 1125)
+
+(define TGC-DESIGN-WIDTH 725)
+(define TGC-DESIGN-HEIGHT 975)
+
+(define DESIGN-WIDTH TGC-DESIGN-WIDTH)
+(define DESIGN-HEIGHT TGC-DESIGN-HEIGHT)
+
+(define CARD-WIDTH TGC-CARD-WIDTH)
+(define CARD-HEIGHT TGC-CARD-HEIGHT)
+
+
+;(define DESIGN-WIDTH ARTSCOW-DESIGN-WIDTH)
+;(define DESIGN-HEIGHT ARTSCOW-DESIGN-HEIGHT)
+
+;(define CARD-WIDTH ARTSCOW-CARD-WIDTH)
+;(define CARD-HEIGHT ARTSCOW-CARD-HEIGHT)
 
 ;; TODO: Identify the real pixel bleed area...
 (define BLANK (rectangle DESIGN-WIDTH DESIGN-HEIGHT 'solid TRANS))
